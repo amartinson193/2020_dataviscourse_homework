@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "..\\.."
+		},
+		{
+			"name": "d3-book",
+			"path": "..\\..\\..\\d3-book"
+		}
+	],
+	"settings": {}
+}
