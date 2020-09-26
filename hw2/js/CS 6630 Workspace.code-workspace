@@ -8,5 +8,7 @@
 			"path": "..\\..\\..\\d3-book"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "2020_dataviscourse_homework"
+	}
 }

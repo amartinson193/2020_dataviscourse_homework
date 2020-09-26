@@ -2,11 +2,43 @@
  * Makes the first bar chart appear as a staircase.
  *
  * Note: use only the DOM API, not D3!
+ * 
  */
+
 function staircase() {
   // ****** TODO: PART II ******
 
+  
+  function sort_staircase(){
+    width_array = []
+
+    // Get the widths in an array
+    for (i of document.getElementById("aBarChart").children){
+      console.log(i.attributes.width.value)
+      width_array.push(i.attributes.width.value)
+    }
+
+    // Function to put in the sort function
+    function compareNumbers(a,b){
+      return a-b
+    }
+
+    // Sort function taken from lecture notes: http://dataviscourse.net/tutorials/lectures/lecture-javascript/
+    width_array.sort(compareNumbers);
+
+    // Loop through the elements and assign the sorted widths
+    count = 0
+    for (i of document.getElementById("aBarChart").children){
+      i.attributes.width.value = width_array[count]
+      count+=1
+    
+    }
+
+  }
+
+  sort_staircase()
 }
+
 
 /**
  * Render the visualizations
@@ -35,14 +67,18 @@ function update(data) {
   let areaChart_width = 295;
   let maxBar_width = 240;
   let data_length = 15;
+  let max_cases = d3.max(data, d => d.cases);
+  let max_deaths = d3.max(data, d => d.deaths);
   let aScale = d3
     .scaleLinear()
     .domain([0, d3.max(data, d => d.cases)])
-    .range([0, maxBar_width]);
+    .range([0, maxBar_width])
+    .nice();
   let bScale = d3
     .scaleLinear()
     .domain([0, d3.max(data, d => d.deaths)])
-    .range([0, maxBar_width]);
+    .range([0, maxBar_width])
+    .nice();
   let iScale_line = d3
     .scaleLinear()
     .domain([0, data.length])
@@ -68,16 +104,115 @@ function update(data) {
 
   // TODO: Select and update the 'a' bar chart bars
 
+  // Set Bar Chart A rectangle widths and scale them
+  aBar = d3.select("#aBarChart")
+           .selectAll('rect')
+           .data(data)
+  
+  newBars = aBar.enter()
+              .append("rect")
+              .attr("width",d => aScale(d.cases))
+              .attr("height",12)
+              .attr("transform", (d,i) => {
+                return "translate("
+                    + 0 // x position
+                    + ","
+                    + (i * 14) // y position
+                    + ")"
+                    + "scale(-1,1)"
+                  }
+              )
+ 
+  aBar.exit().remove()
+
+  aBar = newBars.merge(aBar)
+
+  aBar.attr("width",0)
+    .transition()
+    .duration(1000)
+    .attr("width",d => aScale(d.cases))
+  
+  // add interactivity -- Referenced this code for help: https://observablehq.com/@zhou325/lab-2-next-steps
+  aBar.on('mouseover', (d, i, g) => {
+    d3.select(g[i]).style('fill', 'rgb(0,0,0)')
+                   })
+
+  aBar.on('mouseout', (d, i, g) => {
+    d3.select(g[i]).style('fill', 'rgb(241,151,186)');
+    }
+  );
+
   // TODO: Select and update the 'b' bar chart bars
+  bBar = d3.select("#bBarChart")
+    .selectAll('rect')
+    .data(data)
+    
+    bBar.join(
+      enter =>
+        enter
+        .append("rect")
+        .attr("width",0)
+        .attr("height", 12)
+        .attr("transform", (d,i) => {
+          return "translate("
+              + 0 // x position
+              + ","
+              + ((i+1) * 14) // y position
+              + ")"
+              + "scale(1,-1)"
+            }
+        )
+        ,
+    
+      update =>
+        update
+        .transition()
+        .duration(1000)
+        .attr("width",d => bScale(d.deaths))
+        .attr("transform", (d,i) => {
+          return "translate("
+              + 0 // x position
+              + ","
+              + ((i+1) * 14) // y position
+              + ")"
+              + "scale(1,-1)"
+            }
+        ),
+      exit => exit.remove()
+    );
+
+    // add interactivity -- Referenced this code for help: https://observablehq.com/@zhou325/lab-2-next-steps
+    bBar.on('mouseover', (d, i, g) => {
+      d3.select(g[i]).style('fill', 'rgb(0,0,0)')
+                     })
+  
+    bBar.on('mouseout', (d, i, g) => {
+      d3.select(g[i]).style('fill', 'rgb(79,175,211)');
+      }
+    );
 
   // TODO: Select and update the 'a' line chart path using this line generator
   let aLineGenerator = d3
     .line()
     .x((d, i) => iScale_line(i))
     .y(d => aScale(d.cases));
+  
+  d3.select("#aLineChart")
+    .datum(data)
+    .attr("d",aLineGenerator)
+
 
   // TODO: Select and update the 'b' line chart path (create your own generator)
 
+  let bLineGenerator = d3
+  .line()
+  .x((d, i) => iScale_line(i))
+  .y(d => bScale(d.deaths));
+
+d3.select("#bLineChart")
+  .datum(data)
+  .attr("d",bLineGenerator)
+  
   // TODO: Select and update the 'a' area chart path using this area generator
   let aAreaGenerator = d3
     .area()
@@ -85,18 +220,96 @@ function update(data) {
     .y0(0)
     .y1(d => aScale(d.cases));
 
+    d3.select("#aAreaChart")
+    .datum(data)
+    .attr("d",aAreaGenerator)
+    
   // TODO: Select and update the 'b' area chart path (create your own generator)
 
+  let bAreaGenerator = d3
+  .area()
+  .x((d, i) => iScale_area(i))
+  .y0(0)
+  .y1(d => bScale(d.deaths));
+
+  d3.select("#bAreaChart")
+  .datum(data)
+  .attr("d",bAreaGenerator)
+
   // TODO: Select and update the scatterplot points
+
+  let xAxis = d3.axisBottom()
+                .ticks(5);
+  xAxis.scale(aScale);
   
+  // X-Axis
+  d3.select(".x-axis").remove();
+  d3.select("#scatterplot")
+    .append("g")
+    .call(xAxis)
+    .classed("x-axis",true)
+    .attr("transform","translate(0, 240)");
+
+  let yAxis = d3.axisLeft();
+  yAxis.scale(bScale);
+
+  // Y-Axis
+  d3.select(".y-axis").remove();
+  d3.select("#scatterplot")
+    .append("g")
+    .call(yAxis)
+    .classed("y-axis",true);
+  
+  selection_scatter = d3.select("#scatterplot")
+    .selectAll('circle')
+    .data(data);
+    
+  selection_scatter.join(
+    enter =>
+      enter
+      .append("circle")
+      .attr("cx",d => aScale(d.cases) )
+      .attr("cy",d => bScale(d.deaths) )
+      .attr("r",5)
+      ,
+  
+    update =>
+      update
+      .attr("cx",d => aScale(d.cases) )
+      .attr("cy",d => bScale(d.deaths) )
+      .attr("r",5)
+      ,
+    exit => exit.remove()
+  );
+ 
+  // Test to check console logs for events
+  d3.select("#scatterplot").on("click", function () {
+
+  let scatter_point = d3.event.target
+  console.log("X: " + aScale.invert(scatter_point.attributes.cx.value) + ",Y: " + (bScale.invert(scatter_point.attributes.cy.value)))
+  })
+
+  // Add event listener for scatterplot point hover
+  d3.select("#scatterplot").on("mouseover", function () {
+    
+    let scatter_point = d3.event.target
+    d3.selectAll("circle > title").remove()
+    d3.selectAll("#scatterplot > circle")
+    .append("title")
+    .text("X: " + aScale.invert(scatter_point.attributes.cx.value) + ",Y: " + (bScale.invert(scatter_point.attributes.cy.value)))
+    
+  })
+
+          }
   // ****** TODO: PART IV ******
-}
 
 /**
  * Update the data according to document settings
  */
 async function changeData() {
   //  Load the file indicated by the select menu
+
+  console.log("ChangeData Function here")
   let dataFile = document.getElementById("dataset").value;
   try {
     const data = await d3.csv("data/" + dataFile + ".csv");
@@ -111,6 +324,8 @@ async function changeData() {
     console.log(error)
     alert("Could not load the dataset!");
   }
+
+
 }
 
 /**
@@ -120,3 +335,5 @@ async function changeData() {
 function randomSubset(data) {
   return data.filter(d => Math.random() > 0.5);
 }
+
+

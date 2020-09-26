@@ -78,26 +78,28 @@
         grid-template-columns: 1fr 1fr;
       }
     </style>
+      
+
   </head>
 
   <body>
     <h3>CS-5630 / CS-6630 Homework 3</h3>
     <address>
-      <span>Your Name</span>
-      <span>Your Email</span>
-      <span>Your UID</span>
+      <span>Andreas Martinson</span>
+      <span>andreas.martinson@utah.edu</span>
+      <span>u1291396</span>
     </address>
     <br />
     <hr />
     <br />
 
     <span>
-      <button>Staircase</button>
+      <button onclick="staircase()">Staircase</button>
     </span>
 
     <span>
       <label>Dataset:</label>
-      <select id="dataset">
+      <select id="dataset" onclick="changeData()">
         <option value="covid_us">The US</option>
         <option selected value="covid_utah">Utah</option>
         <option value="covid_ca">California</option>
@@ -105,7 +107,7 @@
       </select>
     </span>
 
-    <span> <input type="checkbox" id="random" /> Random Subset </span>
+    <span> <input onclick ="changeData()" type="checkbox" id="random" /> Random Subset </span>
 
     <br />
 
@@ -113,11 +115,11 @@
       <div>
         <h2>Bar Charts</h2>
         <div>
-          <svg width="350" height="230">
+          <svg width="350" height="230" id="aBarChartsvg" >
             <g id="aBarChart-axis"></g>
             <g class="bar-chart bar-chart-x" id="aBarChart" transform="translate(345, 0)">
-              <rect width="100" height="12" transform="translate(0, 0) scale(-1, 1)"/>
-              <rect width="80" height="12" transform="translate(0, 14) scale(-1, 1)"/>
+              <rect width="100" height="12" transform="translate(0, 0) scale(-1, 1)" />
+              <rect width="80" height="12" transform="translate(0, 14) scale(-1, 1)" />
               <rect width="130" height="12" transform="translate(0, 28) scale(-1, 1)"/>
               <rect width="90" height="12" transform="translate(0, 42) scale(-1, 1)"/>
               <rect width="170" height="12" transform="translate(0, 56) scale(-1, 1)"/>
@@ -135,7 +137,9 @@
           </svg>
           <svg width="350" height="230">
             <g id="bBarChart-axis"></g>
-            <g class="bar-chart bar-chart-y" id="bBarChart" transform="translate(5, 0)"></g>
+            <g class="bar-chart bar-chart-y" id="bBarChart" transform="translate(5, 0)">
+            </g>
+
           </svg>
         </div>
       </div>
@@ -175,7 +179,7 @@
       <div>
         <h2>Scatterplot</h2>
         <svg class="scatter-plot" width="600" height="300">
-          <g transform="translate(180, 10) " id="scatterplot">
+          <g transform="translate(180, 20) " id="scatterplot">
             <g id="x-axis" transform="translate(0, 240)"></g>
             <g id="y-axis" transform="translate(0, 0)"></g>
           </g>
@@ -183,4 +187,7 @@
       </div>
     </div>
   </body>
+  <script src="script.js"></script>
+  <script src="https://d3js.org/d3.v5.js"></script>
+
 </html>
